@@ -41,10 +41,5 @@ if __name__ == "__main__":
     observer = Observer()
     observer.schedule(event_handler, path='/factorio/logs/console.log', recursive=True)
     observer.start()
-
-    try:
-        while True:
-            time.sleep(1)
-    finally:
-        observer.stop()
-        observer.join()
+    observer.stop()
+    observer.join()
