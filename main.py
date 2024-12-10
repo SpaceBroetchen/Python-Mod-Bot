@@ -29,7 +29,7 @@ if __name__ == "__main__":
     
     load_dotenv()
     TOKEN = os.getenv('DISCORD_TOKEN')
-    client = MyClient()
+    client = MyClient(intents=discord.Intents.default())
     client.run(TOKEN)
     event_handler = MyHandler(client)
     observer = Observer()
