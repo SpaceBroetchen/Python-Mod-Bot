@@ -3,13 +3,23 @@ from watchdog.events import FileSystemEventHandler
 import discord
 from dotenv import load_dotenv
 import os
+import datetime
 
 global observer
+
+KEYWORDS = ["JOIN", "LEAVE"]
+
+
+def format_message(message):
+    splt = message.split("[")
+    unix_timestamp = int(datetime.datetime.strptime(splt[0], "%Y-%m-%d %H:%M:%S ").timestamp())
+    return f"<t:{unix_timestamp}:f>`{'['.join(splt[1:])}`"
+
 
 class MyClient(discord.Client):
     async def on_log_updated(self, message):
         channel = self.get_channel(1315700405430128730)
-        await channel.send(message)
+        await channel.send(format_message(message))
 
     async def on_ready(self):
         channel = self.get_channel(1315700405430128730)
@@ -18,8 +28,8 @@ class MyClient(discord.Client):
         event_handler = MyHandler(self)
         observer.schedule(event_handler, path='/factorio/logs/console.log', recursive=True)
         observer.start()
-        
-        await channel.send("Mod Log bot is listening...")
+
+        await channel.send("Der Log bot arbeitet....")
 
 
 
@@ -34,8 +44,14 @@ class MyHandler(FileSystemEventHandler):
                 for line in f:
                     pass
                 last_line = line
+
+            for i in KEYWORDS:
+                if i in last_line:
+                    client.dispatch("log_updated", last_line)
+                    break
+
+
             print(last_line)
-            client.dispatch("log_updated", last_line)
 
 
 if __name__ == "__main__":
