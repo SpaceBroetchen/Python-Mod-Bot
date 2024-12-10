@@ -5,8 +5,11 @@ from watchdog.events import FileSystemEventHandler
 class MyHandler(FileSystemEventHandler):
     def on_modified(self, event):
         print("File has been modified")
-        if (event.is_directory):
-            print(event)
+        if (!event.is_directory):
+            with open('/factorio/logs/console.log') as f:
+                for line in f:
+                    pass
+                last_line = line
 
 if __name__ == "__main__":
     print("Started")
