@@ -4,9 +4,10 @@ from watchdog.events import FileSystemEventHandler
 
 class MyHandler(FileSystemEventHandler):
     def on_modified(self, event):
-        print('File has been modified')
+        print("File has been modifie")
 
 if __name__ == "__main__":
+    print("Started")
     event_handler = MyHandler()
     observer = Observer()
     observer.schedule(event_handler, path='/factorio/logs', recursive=True)
