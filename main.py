@@ -46,7 +46,7 @@ class MyHandler(FileSystemEventHandler):
                 last_line = line
 
             for i in KEYWORDS:
-                if i in last_line:
+                if True:
                     client.dispatch("log_updated", last_line)
                     break
 
