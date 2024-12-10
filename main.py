@@ -26,7 +26,7 @@ class MyHandler(FileSystemEventHandler):
                     pass
                 last_line = line
             print(last_line)
-            client.dispatch("on_log_updated", last_line)
+            client.dispatch("log_updated", last_line)
 
 if __name__ == "__main__":
     print("Started")
