@@ -7,10 +7,10 @@ import os
 
 class MyClient(discord.Client):
     async def on_log_updated(self, message):
-        channel = self.get_channel("1315700405430128730")
+        channel = self.get_channel(1315700405430128730)
         await self.send(message)
     async def on_ready(self):
-        channel = self.get_channel("1315700405430128730")
+        channel = self.get_channel(1315700405430128730)
         print(self.status)
         await channel.send("Der Log bot arbeitet....")
 
