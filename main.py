@@ -14,7 +14,7 @@ class MyHandler(FileSystemEventHandler):
                     pass
                 last_line = line
             print(last_line)
-            client = discord.Client()
+            client = discord.Client(intents=discord.Intents.default())
             load_dotenv()
             TOKEN = os.getenv('DISCORD_TOKEN')
             client.run(TOKEN)
