@@ -19,7 +19,7 @@ class MyHandler(FileSystemEventHandler):
             TOKEN = os.getenv('DISCORD_TOKEN')
             client.run(TOKEN)
             channel = client.get_channel("1315700405430128730")
-            await channel.send(last_line)
+            channel.send(last_line)
 
 if __name__ == "__main__":
     print("Started")
