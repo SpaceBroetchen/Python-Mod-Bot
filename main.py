@@ -4,14 +4,16 @@ from watchdog.events import FileSystemEventHandler
 import discord
 from dotenv import load_dotenv
 import os
-import asyncio
 
-async def send_message(message, client):    
-    channel = client.get_channel("1315700405430128730")
-    await channel.send(message)
-
+class MyClient(discord.Client):
+    async def on_log_updated(message):
+        channel = client.get_channel("1315700405430128730")
+        await channel.send(message)    
 
 class MyHandler(FileSystemEventHandler):
+    def __init__(self, client):    
+        self.client = client
+
     def on_modified(self, event):
         print("File has been modified")
         if not event.is_directory:
@@ -20,16 +22,16 @@ class MyHandler(FileSystemEventHandler):
                     pass
                 last_line = line
             print(last_line)
-            client = discord.Client(intents=discord.Intents.default())
-            load_dotenv()
-            TOKEN = os.getenv('DISCORD_TOKEN')
-            client.run(TOKEN)
-            asyncio.run(main(send_message(last_line, client)))
+            client.dispatch("on_log_updated", last_line)
 
 if __name__ == "__main__":
     print("Started")
-
-    event_handler = MyHandler()
+    
+    load_dotenv()
+    TOKEN = os.getenv('DISCORD_TOKEN')
+    client = MyClient()
+    client.run(TOKEN)
+    event_handler = MyHandler(client)
     observer = Observer()
     observer.schedule(event_handler, path='/factorio/logs/console.log', recursive=True)
     observer.start()
