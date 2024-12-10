@@ -3,6 +3,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import discord
 from dotenv import load_dotenv
+import os
 
 
 class MyHandler(FileSystemEventHandler):
