@@ -1,21 +1,30 @@
-import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import discord
 from dotenv import load_dotenv
 import os
 
+global observer
+
 class MyClient(discord.Client):
     async def on_log_updated(self, message):
         channel = self.get_channel(1315700405430128730)
-        await self.send(message)
+        await channel.send(message)
+
     async def on_ready(self):
         channel = self.get_channel(1315700405430128730)
-        print(self.status)
+
+        global observer
+        event_handler = MyHandler(self)
+        observer.schedule(event_handler, path='/factorio/logs/console.log', recursive=True)
+        observer.start()
+        
         await channel.send("Der Log bot arbeitet....")
 
+
+
 class MyHandler(FileSystemEventHandler):
-    def __init__(self, client):    
+    def __init__(self, client):
         self.client = client
 
     def on_modified(self, event):
@@ -28,18 +37,12 @@ class MyHandler(FileSystemEventHandler):
             print(last_line)
             client.dispatch("log_updated", last_line)
 
+
 if __name__ == "__main__":
-    print("Started")
-    
+    observer = Observer()
     load_dotenv()
     TOKEN = os.getenv('DISCORD_TOKEN')
     client = MyClient(intents=discord.Intents.default())
-    print(client.status)
-    print("Hello")
-    event_handler = MyHandler(client)
-    observer = Observer()
-    observer.schedule(event_handler, path='/factorio/logs/console.log', recursive=True)
-    observer.start()
     client.run(TOKEN)
     observer.stop()
     observer.join()
