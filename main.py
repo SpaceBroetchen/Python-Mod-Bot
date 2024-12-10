@@ -10,6 +10,7 @@ class MyHandler(FileSystemEventHandler):
                 for line in f:
                     pass
                 last_line = line
+            print(last_line)
 
 if __name__ == "__main__":
     print("Started")
