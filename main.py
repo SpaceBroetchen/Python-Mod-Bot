@@ -4,7 +4,7 @@ from watchdog.events import FileSystemEventHandler
 
 class MyHandler(FileSystemEventHandler):
     def on_modified(self, event):
-        print(f'File {event.src_path} has been modified')
+        print('File has been modified')
 
 if __name__ == "__main__":
     event_handler = MyHandler()
@@ -15,6 +15,6 @@ if __name__ == "__main__":
     try:
         while True:
             time.sleep(1)
-    except KeyboardInterrupt:
+    finally:
         observer.stop()
-    observer.join()
+        observer.join()
