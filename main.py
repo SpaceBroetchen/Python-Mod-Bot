@@ -7,7 +7,7 @@ import datetime
 
 global observer
 
-KEYWORDS = ["JOIN", "LEAVE"]
+KEYWORDS = ["[JOIN]", "[LEAVE]", "[COMMAND]", "[BAN]"]
 
 
 def format_message(message):
