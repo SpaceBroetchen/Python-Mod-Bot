@@ -32,6 +32,7 @@ if __name__ == "__main__":
     client = MyClient(intents=discord.Intents.default())
     client.run(TOKEN)
     print(client.status)
+    print("Hello")
     event_handler = MyHandler(client)
     observer = Observer()
     observer.schedule(event_handler, path='/factorio/logs/console.log', recursive=True)
