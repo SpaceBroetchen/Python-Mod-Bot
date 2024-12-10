@@ -5,7 +5,7 @@ from watchdog.events import FileSystemEventHandler
 class MyHandler(FileSystemEventHandler):
     def on_modified(self, event):
         print("File has been modified")
-        if (event.is_directory()):
+        if (event.is_directory):
             print(event)
 
 if __name__ == "__main__":
