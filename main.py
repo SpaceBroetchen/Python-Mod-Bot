@@ -4,6 +4,7 @@ from watchdog.events import FileSystemEventHandler
 import discord
 from dotenv import load_dotenv
 import os
+import asyncio
 
 async def send_message(message, client):    
     channel = client.get_channel("1315700405430128730")
@@ -23,7 +24,7 @@ class MyHandler(FileSystemEventHandler):
             load_dotenv()
             TOKEN = os.getenv('DISCORD_TOKEN')
             client.run(TOKEN)
-            send_message(last_line, client)
+            asyncio.run(main(send_message(last_line, client)))
 
 if __name__ == "__main__":
     print("Started")
