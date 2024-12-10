@@ -12,7 +12,7 @@ class MyClient(discord.Client):
     async def on_ready(self):
         channel = self.get_channel("1315700405430128730")
         print(self.status)
-        await self.send("Der Log bot arbeitet....")
+        await channel.send("Der Log bot arbeitet....")
 
 class MyHandler(FileSystemEventHandler):
     def __init__(self, client):    
