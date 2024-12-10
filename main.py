@@ -5,6 +5,10 @@ import discord
 from dotenv import load_dotenv
 import os
 
+async def send_message(message, client):    
+    channel = client.get_channel(1315700405430128730)
+    await channel.send(message)
+
 
 class MyHandler(FileSystemEventHandler):
     def on_modified(self, event):
@@ -19,8 +23,7 @@ class MyHandler(FileSystemEventHandler):
             load_dotenv()
             TOKEN = os.getenv('DISCORD_TOKEN')
             client.run(TOKEN)
-            channel = client.get_channel("1315700405430128730")
-            channel.send(last_line)
+            send_message(last_line, client)
 
 if __name__ == "__main__":
     print("Started")
