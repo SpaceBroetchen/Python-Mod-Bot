@@ -7,7 +7,7 @@ import datetime
 
 global observer
 
-KEYWORDS = ["[UNBANNED]", "[COMMAND]", "[BAN]", "[WARNING]"]
+KEYWORDS = ["[UNBANNED]", "[COMMAND]", "[BAN]", "[WARNING]", "[KICK]", "[COLOR]"]
 
 
 def format_message(message):
