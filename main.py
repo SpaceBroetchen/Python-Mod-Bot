@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import os
 
 async def send_message(message, client):    
-    channel = client.get_channel(1315700405430128730)
+    channel = client.get_channel("1315700405430128730")
     await channel.send(message)
 
 
