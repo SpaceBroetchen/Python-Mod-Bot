@@ -13,7 +13,7 @@ KEYWORDS = ["[UNBANNED]", "[COMMAND]", "[BAN]", "[WARNING]"]
 def format_message(message):
     splt = message.split("[")
     unix_timestamp = int(datetime.datetime.strptime(splt[0], "%Y-%m-%d %H:%M:%S ").timestamp())
-    return f"<t:{unix_timestamp}:f>```[{'['.join(splt[1:])}```"
+    return f"<t:{unix_timestamp}:f>`[{'['.join(splt[1:])}`"
 
 
 class MyClient(discord.Client):
@@ -46,7 +46,7 @@ class MyHandler(FileSystemEventHandler):
                 last_line = line
 
             for i in KEYWORDS:
-                if i in KEYWORDS:
+                if i in last_line:
                     client.dispatch("log_updated", last_line)
                     break
 
