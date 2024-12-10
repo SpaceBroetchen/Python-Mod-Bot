@@ -29,7 +29,7 @@ class MyClient(discord.Client):
         observer.schedule(event_handler, path='/factorio/logs/console.log', recursive=True)
         observer.start()
 
-        await channel.send("Der Log bot arbeitet....")
+        await channel.send("The Mod Log bot listens...")
 
 
 
