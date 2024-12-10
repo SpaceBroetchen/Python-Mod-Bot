@@ -8,7 +8,11 @@ import os
 class MyClient(discord.Client):
     async def on_log_updated(message):
         channel = client.get_channel("1315700405430128730")
-        await channel.send(message)    
+        await channel.send(message)
+    async def on_ready(self):
+        channel = client.get_channel("1315700405430128730")
+        print(self.status)
+        await channel.send("Der Log bot arbeitet....")  
 
 class MyHandler(FileSystemEventHandler):
     def __init__(self, client):    
