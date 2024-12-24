@@ -3,36 +3,10 @@ import os
 import re
 
 from configImport import *
+from blueprintGenerator.Mod import Mod
 
 MOD_MATCH = re.compile("^ *([?!])? *[a-zA-Z0-9_-]+ *((>=|>|=|<|<=) *[0-9]{1,10}\.[0-9]{1,10}\.[0-9]{1,10} *)?$")
 MOD_MATCH_SHORT = re.compile("[a-zA-Z0-9_-]+")
-
-class PrimitiveMod:
-    def __init__(self, name, dependencies):
-        self.name = name
-        self.dependencies = dependencies
-
-    def __eq__(self, other):
-        return self.name == other.name
-
-    def __gt__(self, other):
-        if other.name in self.dependencies:
-            return True
-        if self.name in other.dependencies:
-            return False
-        return self.name > other.name
-
-    def __ge__(self, other):
-        return self > other or self == other
-
-    def __lt__(self, other):
-        return not self >= other
-
-    def __le__(self, other):
-        return not self > other
-
-    def __repr__(self):
-        return self.name
 
 def parseDependencyString(string):
     if "!" in string:  # ignored, actual check is done by factorio
@@ -57,11 +31,28 @@ def retrieveDependencies(mod):
     return out
 
 
-def getDependencyOrder(mods):
-    primitiveMods = []
-    for i in mods.keys():
-        primitiveMods.append(PrimitiveMod(i, retrieveDependencies(i)))
-    primitiveMods.sort()
-    return primitiveMods
+def isDependencyFulfilled(mod, activeDependencies, all_mods):
+    found_dependencies = 0
+    for i in mod.dependencies:
+        if not any([i == j.name for j in all_mods]):
+            found_dependencies += 1
+            continue
+        for j in activeDependencies:
+            if i == j.name:
+                found_dependencies += 1
+                break
+    return found_dependencies == len(mod.dependencies)
 
-print(getDependencyOrder(ACTIVE_MODS))
+
+def getDependencyOrder(mods):
+    mod_list = []
+    for i in mods.keys():
+        mod_list.append(Mod(i, retrieveDependencies(i)))
+    full_mod_list = mod_list.copy()
+    return_mod_list = []
+    while len(mod_list) > 0:
+        possibilities = list(filter(lambda x: isDependencyFulfilled(x, return_mod_list, full_mod_list), mod_list))
+        possibilities.sort()
+        mod_list.remove(possibilities[0])
+        return_mod_list.append(possibilities[0])
+    return return_mod_list

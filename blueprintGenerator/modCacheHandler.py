@@ -55,10 +55,10 @@ def createModCache():
     fails = 0
     success = 0
     active = {}
-    for i in ACTIVE_MODS.keys():
-        if copyMod(i, ACTIVE_MODS[i]):
+    for i in MODS.keys():
+        if copyMod(i, MODS[i]):
             success += 1
-            active[i] = ACTIVE_MODS[i]
+            active[i] = MODS[i]
         else:
             fails += 1
     print(f"loaded {success} mods successfully, failed {fails}")
