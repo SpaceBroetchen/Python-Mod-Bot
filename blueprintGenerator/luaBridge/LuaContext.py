@@ -53,6 +53,7 @@ class LuaContext:
         self["system_path_seperator"] = os.sep
         self["cache_path_base"] = os.path.join(CACHE, "mods")
         self["dependency_order"] = [i.name for i in getDependencyOrder(MODS)]
+        self["cache_path"] = CACHE
 
     @requiresRunning
     @throwsLuaError
