@@ -95,6 +95,7 @@ def createDefinesCache():
                     except KeyError:
                         pass
                 write_file.write("\t},\n")
+            write_file.write("\t[\"deepcopy\"] = table.deepcopy\n")
             write_file.write("}\n")
 
 
