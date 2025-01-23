@@ -1,4 +1,5 @@
-from blueprintGenerator.dependecyResolver import getDependencyOrder
+from BlueprintGenerator.CacheHandler import fetchActiveModSettings
+from BlueprintGenerator.DependecyResolver import getDependencyOrder
 from configImport import *
 import os
 
@@ -24,24 +25,26 @@ def throwsLuaError(method):
 
 
 class LuaContext:
+    @throwsLuaError
     def __init__(self):
-        self.runtime = LUA_ENGINE.LuaRuntime()
+        self.running = False
+        self.runtime = LUA_ENGINE.LuaRuntime(max_memory=MAX_LUA_MEMORY)
         self.set_env_variable = self.runtime.eval("function(attribute_name, value) _G[attribute_name] = value; end")
         self.get_env_variable = self.runtime.eval("function(attribute_name) return _G[attribute_name]; end")
-        self.execute_phase_ev = self.runtime.eval("function(phase_name) return phase_executor(phase_name); end")
-        self.running = False
+        self.init_phase = self.runtime.eval("function(phase_name) return initialize_phase(phase_name); end")
+        self.run_phase = self.runtime.eval("function(phase_name) return run_phase(phase_name); end")
 
     @throwsLuaError
     def runEngine(self):
-        self.runtime.require("LuaEnvBuilder")
+        self.runtime.require("FactorioExecutor")
         self.running = True
 
     @throwsLuaError
     def __setitem__(self, key, value):
         if isinstance(value, (list, tuple)):
-            value = self.runtime.table_from(value)
-        elif isinstance(value, (dict)):
-            value = self.runtime.table_from(value, bool_recursive=True)
+            value = self.runtime.table_from(value, recursive=True)
+        elif isinstance(value, dict):
+            value = self.runtime.table_from(value, recursive=True)
         self.set_env_variable(key, value)
 
     @throwsLuaError
@@ -58,10 +61,40 @@ class LuaContext:
     @requiresRunning
     @throwsLuaError
     def initializePhase(self, phase_name):
-        return self.execute_phase_ev(phase_name)
+        return self.init_phase(phase_name)
 
+    @requiresRunning
+    @throwsLuaError
+    def runPhase(self, phase_name):
+        return self.run_phase(phase_name)
+
+    @requiresRunning
+    def startGame(self):
+        ctx.initializePhase("settings")
+        ctx.runPhase("settings")
+        ctx.runPhase("settings-updates")
+        ctx.runPhase("settings-final-fixes")
+        settings_data = self["raw_data"]
+
+        input_settings_data = {
+            "startup": {},
+            "runtime-global": {}
+        }
+        for settings_type in settings_data:
+            for setting in settings_data[settings_type]:
+                sett = settings_data[settings_type][setting]
+                if sett["setting_type"] == "startup":
+                    if sett["name"] in MOD_SETTINGS["startup"].keys():
+                        input_settings_data["startup"][sett["name"]] = MOD_SETTINGS["startup"][sett["name"]]
+                    else:
+                        input_settings_data["startup"][sett["name"]] = {"value": sett["default_value"]}
+        self["settings"] = input_settings_data
+        self.initializePhase("data")
+        self.runPhase("data")
+        self.runPhase("data-updates")
+        self.runPhase("data-final-fixes")
 
 ctx = LuaContext()
 ctx.load_defaults()
 ctx.runEngine()
-ctx.initializePhase("settings")
+ctx.startGame()

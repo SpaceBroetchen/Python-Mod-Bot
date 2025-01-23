@@ -2,7 +2,6 @@ local real_load_file = loadfile
 local path_seperator = system_path_seperator
 local cache_path_base = cache_path_base
 local dependency_order = dependency_order
-package.path = cache_path .. system_path_seperator .. "?.lua;?.lua"
 require("TableUtils")
 require("api.defines")
 
@@ -10,8 +9,12 @@ require("api.defines")
 loaded_prototypes = 0
 raw_data = {}
 
-function build_env(mod_name)
+function build_env(mod_name, settings)
     local mod_name = mod_name
+
+    if settings ~= nil then
+        settings = TableUtils.deepcopy(settings)
+    end
 
     local env = {
         -- default factorio variables
@@ -19,9 +22,9 @@ function build_env(mod_name)
             raw = raw_data
         },
         mods = {},
-        settings = {},
+        settings = settings,
         feature_flags = {},
-        defines = defines:deepcopy(),
+        defines = TableUtils.deepcopy(defines),
         -- standard functions
         print = print,
         package = {
@@ -38,7 +41,8 @@ function build_env(mod_name)
         },
         tostring = tostring,
         table = {
-            insert = table.insert
+            insert = table.insert,
+            deepcopy = table.deepcopy
         },
         pairs = pairs,
         ipairs = ipairs,
@@ -81,6 +85,8 @@ function build_env(mod_name)
 
         if executable == nil then
             print("file not found!, " .. name)
+            error("Here is an error")
+
         else
             local out = executable()
             --extendDeepTable(env, out, name)
@@ -103,7 +109,7 @@ function build_env(mod_name)
                 return
             end
 
-            print("registering prototype: " .. prototype.name .. " (" .. prototype.type .. ")")
+            --print("registering prototype: " .. prototype.name .. " (" .. prototype.type .. ")")
 
             local ptable = env.data.raw[prototype.type] or {}
             env.data.raw[prototype.type] = ptable

@@ -3,7 +3,7 @@ import os
 import re
 
 from configImport import *
-from blueprintGenerator.Mod import Mod
+from BlueprintGenerator.Mod import Mod
 
 MOD_MATCH = re.compile("^ *([?!])? *[a-zA-Z0-9_-]+ *((>=|>|=|<|<=) *[0-9]{1,10}\.[0-9]{1,10}\.[0-9]{1,10} *)?$")
 MOD_MATCH_SHORT = re.compile("[a-zA-Z0-9_-]+")

@@ -1,4 +1,7 @@
-function table.extend(table, value, path)
+
+TableUtils = {}
+
+function TableUtils.extend(table, value, path)
     matches = path:gmatch("([^.]+)")
     for w in matches do
         t = table[w] or {}
@@ -9,7 +12,7 @@ function table.extend(table, value, path)
     table[l] = value
 end
 
-function table.print(t, max_depth, offset, key)
+function TableUtils.print(t, max_depth, offset, key)
     max_depth = max_depth or 10
     offset = offset or 0
     if key == nil then
@@ -26,7 +29,7 @@ function table.print(t, max_depth, offset, key)
             print(("    "):rep(offset) .. key .. tostring(t) .. ":")
             for k, v in pairs(t) do
                 if (type(v) == "table") then
-                    table.print(v, max_depth, offset + 1, k)
+                    TableUtils.print(v, max_depth, offset + 1, k)
                 else
                     print(("    "):rep(offset + 1) .. '"' .. tostring(k) .. "\": " .. tostring(v))
                 end
@@ -35,15 +38,15 @@ function table.print(t, max_depth, offset, key)
     end
 end
 
-function table.deepcopy(t)
+function TableUtils.deepcopy(t)
     local out = {}
 
     for k, v in pairs(t) do
         if type(k) == "table" then
-            k = table.deepcopy(k)
+            k = TableUtils.deepcopy(k)
         end
         if type(v) == "table" then
-            v = table.deepcopy(v)
+            v = TableUtils.deepcopy(v)
         end
         out[k] = v
     end
