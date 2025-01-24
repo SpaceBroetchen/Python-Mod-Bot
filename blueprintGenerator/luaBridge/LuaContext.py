@@ -1,7 +1,12 @@
+import json
+
 from BlueprintGenerator.CacheHandler import fetchActiveModSettings
 from BlueprintGenerator.DependecyResolver import getDependencyOrder
+from BlueprintGenerator.ModLoader import LUA_ENGINE
 from configImport import *
 import os
+
+
 
 
 def requiresRunning(method):
@@ -23,6 +28,14 @@ def throwsLuaError(method):
 
     return meth
 
+def unpackLuaTable(luaTable):
+    d = dict(luaTable)
+    for i in d.keys():
+        if type(d[i]) in (bool, int, float, str):
+            continue
+        d[i] = unpackLuaTable(d[i])
+    return d
+
 
 class LuaContext:
     @throwsLuaError
@@ -36,7 +49,7 @@ class LuaContext:
 
     @throwsLuaError
     def runEngine(self):
-        self.runtime.require("FactorioExecutor")
+        self.runtime.require("FactorioExecutor2")
         self.running = True
 
     @throwsLuaError
@@ -93,7 +106,9 @@ class LuaContext:
         self.runPhase("data")
         self.runPhase("data-updates")
         self.runPhase("data-final-fixes")
+        #data = unpackLuaTable(self["raw_data"])
 
+        #print(json.dumps(data, indent=4))
 ctx = LuaContext()
 ctx.load_defaults()
 ctx.runEngine()

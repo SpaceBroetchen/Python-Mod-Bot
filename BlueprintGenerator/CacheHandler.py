@@ -175,4 +175,4 @@ if FETCH_MODS_AUTOMATICALLY:
 if FETCH_MOD_SETTINGS_AUTOMATICALLY:
     fetchActiveModSettings()
 
-createDefinesCache()
+#createDefinesCache()
