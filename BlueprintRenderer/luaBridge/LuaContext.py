@@ -1,8 +1,9 @@
 import json
+import pathlib
 
-from BlueprintGenerator.CacheHandler import fetchActiveModSettings
-from BlueprintGenerator.DependecyResolver import getDependencyOrder
-from BlueprintGenerator.ModLoader import LUA_ENGINE
+from BlueprintRenderer.CacheHandler import retrieveModData, storeModData
+from BlueprintRenderer.DependecyResolver import getDependencyOrder
+from BlueprintRenderer.ModLoader import LUA_ENGINE
 from configImport import *
 import os
 
@@ -49,6 +50,9 @@ class LuaContext:
 
     @throwsLuaError
     def runEngine(self):
+        path = pathlib.Path(__file__).parent.resolve()
+        print(path)
+        self.runtime.execute(f"package.path = \"{path}\\?.lua;{path}\\?\";".replace("\\", "\\\\"))
         self.runtime.require("FactorioExecutor2")
         self.running = True
 
@@ -83,10 +87,10 @@ class LuaContext:
 
     @requiresRunning
     def startGame(self):
-        ctx.initializePhase("settings")
-        ctx.runPhase("settings")
-        ctx.runPhase("settings-updates")
-        ctx.runPhase("settings-final-fixes")
+        self.initializePhase("settings")
+        self.runPhase("settings")
+        self.runPhase("settings-updates")
+        self.runPhase("settings-final-fixes")
         settings_data = self["raw_data"]
 
         input_settings_data = {
@@ -106,10 +110,15 @@ class LuaContext:
         self.runPhase("data")
         self.runPhase("data-updates")
         self.runPhase("data-final-fixes")
-        #data = unpackLuaTable(self["raw_data"])
+        self.mod_data = unpackLuaTable(self["raw_data"])
+        storeModData(self.mod_data)
 
-        #print(json.dumps(data, indent=4))
-ctx = LuaContext()
-ctx.load_defaults()
-ctx.runEngine()
-ctx.startGame()
+def getModData():
+    ret = retrieveModData()
+    if ret is None:
+        ctx = LuaContext()
+        ctx.load_defaults()
+        ctx.runEngine()
+        ctx.startGame()
+        return ctx.mod_data
+    return ret

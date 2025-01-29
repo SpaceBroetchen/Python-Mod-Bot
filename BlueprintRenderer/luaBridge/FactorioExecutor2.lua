@@ -1,4 +1,4 @@
-package.path = cache_path .. system_path_seperator .. "?.lua;?.lua"
+package.path = package.path .. ";" .. cache_path .. system_path_seperator .. "?.lua;?.lua"
 local real_load_file = loadfile
 local path_seperator = system_path_seperator
 local cache_path_base = cache_path_base

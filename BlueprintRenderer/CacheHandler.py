@@ -6,7 +6,7 @@ import re
 from packaging.version import Version
 
 import configImport
-from BlueprintGenerator.DataFileLoader import DataFile
+from BlueprintRenderer.DataFileLoader import DataFile
 from configImport import *
 import os
 
@@ -166,9 +166,26 @@ def fetchActiveMods():
     MODS = mods
 
 def fetchActiveModSettings():
-
     configImport.MOD_SETTINGS = DataFile(FACTORIO_SETTINGS_FILE)
 
+def storeModData(modData):
+    folder_name = os.path.join(CACHE, "loaded")
+    if not os.path.exists(folder_name):
+        os.mkdir(folder_name)
+    file_name = os.path.join(folder_name, "save.json")
+    if os.path.exists(file_name):
+        os.remove(file_name)
+    with open(file_name, "w") as fh:
+        json.dump(modData, fh)
+
+def retrieveModData():
+    if os.path.exists(os.path.join(CACHE, "loaded", "save.json")):
+        with open(os.path.join(CACHE, "loaded", "save.json"), "r") as fh:
+            return json.load(fh)
+
+
+    else:
+        return None
 
 if FETCH_MODS_AUTOMATICALLY:
     fetchActiveMods()
