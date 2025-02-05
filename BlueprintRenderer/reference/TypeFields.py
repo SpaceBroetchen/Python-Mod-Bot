@@ -4,7 +4,7 @@ import sys
 
 def typeField(type_name=None):
     def f(cls):
-        Field.addTypeField(type_name if type_name is not None else cls.__name__, cls)
+        Field.add_type_field(type_name if type_name is not None else cls.__name__, cls)
         return cls
 
     return f
@@ -27,11 +27,11 @@ class Field:
         return True
 
     @staticmethod
-    def addTypeField(name, clazz):
+    def add_type_field(name, clazz):
         Field.__field_registry__[name] = clazz
 
-    @staticmethod
-    def getFieldName(type_json):
+    @classmethod
+    def get_field_name(cls, type_json):
         if isinstance(type_json, dict):
             type_json = type_json["complex_type"]
         if type_json not in Field.__field_registry__.keys():
@@ -41,15 +41,49 @@ class Field:
             module = ".".join(os.path.basename(sys.modules[field_class.__module__].__file__).split(".")[:-1])
             return f"{module}.{field_class.__name__}"
 
-    @staticmethod
-    def getFieldImport(type_json):
+    @classmethod
+    def get_field_imports(cls, type_json):
+        type_json = type_json["type"]
         if isinstance(type_json, dict):
             type_json = type_json["complex_type"]
         if type_json not in Field.__field_registry__.keys():
-            return f"import {type_json}\n"
+            return {type_json}
         else:
-            return ""
+            return set()
 
+    @classmethod
+    def get_literal(cls, type_json):
+        return "None"
+
+    @classmethod
+    def get_parameters(cls, type_json):
+        parameters = dict()
+        parameters["optional"] = type_json["optional"]
+        if parameters["optional"]:
+            parameters["default_value"] = cls.get_literal(type_json)
+        return parameters
+
+    @classmethod
+    def get_field(cls, type_json):
+        field_name = Field.get_field_name(type_json['type'])
+        parameters = cls.get_parameters(type_json)
+        parameter_string = ", ".join([f"{k}={v}" for k, v in parameters.items()])
+
+        return f"\t{type_json['name']} = {field_name}({parameter_string})\n"
+
+    @staticmethod
+    def get_field_pair(type_json):
+        field_type = type_json["type"]
+        if isinstance(field_type, dict):
+            field_type = field_type["complex_type"]
+        if field_type in Field.__field_registry__.keys():
+            referred_field = Field.__field_registry__.get(field_type)
+        else:
+            referred_field = StructField
+
+        imports = referred_field.get_field_imports(type_json)
+        field_string = referred_field.get_field(type_json)
+        return imports, field_string
 
 class PrimitiveField(Field):
     field_type = None
@@ -90,7 +124,6 @@ class IntegerField(PrimitiveField):
 class FloatField(PrimitiveField):
     field_type = float
 
-
 @typeField("union")
 class UnionField(Field):
     def __init__(self, default_value=None, optional=True, description="", sub_fields=None):
@@ -113,7 +146,7 @@ class UnionField(Field):
 class LiteralField(UnionField):
     def __init__(self, default_value=None, optional=True, description=""):
         super().__init__(default_value, optional, description,
-                         [IntegerField(), FloatField(), BooleanField(), StringField()])
+                         [FloatField(), IntegerField(), BooleanField(), StringField()])
 
 
 @typeField("array")
@@ -167,3 +200,6 @@ class StructField(Field):
     __meta__ = {
         "fields": {}
     }
+
+@typeField("dictionary")
+class DictionaryField(Field):

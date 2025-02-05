@@ -42,12 +42,12 @@ def generateType(json_content):
         imports = set()
         if "properties" in json_content.keys():
             for field in json_content["properties"]:
-                imports.add(Field.getFieldImport(field["type"]))
+                imports = imports.union(Field.get_field_imports(field))
         if "" in imports:
             imports.remove("")
         if imports:
             for i in imports:
-                file_handle.write(i)
+                file_handle.write(f"import {i}\n")
             file_handle.write("\n")
 
         file_handle.write(f"\n")
@@ -65,11 +65,22 @@ def generateType(json_content):
         if isinstance(json_content["type"], dict) and "complex_type" in json_content["type"] and json_content["type"][
             "complex_type"] == "struct":
             for field in json_content["properties"]:
-                optional = field["optional"]
-                default = field["default"] if "default" in field.keys() else None
+                imports, field_value = Field.get_field_pair(field)
+                file_handle.write(field_value)
 
-                file_handle.write(
-                    f"\t{field['name']} = {Field.getFieldName(field['type'])}({'' if default is None else 'default_value=None, '}{'' if optional is None else 'optional=' + str(optional) + ', '})\n")
+        #if isinstance(json_content["type"], dict) and "complex_type" in json_content["type"] and json_content["type"][
+        #    "complex_type"] == "struct":
+        #    for field in json_content["properties"]:
+        #        optional = field["optional"]
+        #        default = field["default"] if "default" in field.keys() else None
+        #        parameters = dict()
+        #        if optional is not None:
+        #            parameters["optional"] = optional
+        #        if default is not None:
+        #            parameters["default_value"] = default
+        #        parameter_string = ', '.join([k + '=' + str(parameters[k]) for k in parameters.keys()])
+        #        file_handle.write(
+        #            f"\t{field['name']} = {Field.get_field_name(field['type'])}({parameter_string})\n")
 
         elif isinstance(json_content["type"], str) and json_content["type"] == "string" and name.endswith("ID"):
             # ID connector
