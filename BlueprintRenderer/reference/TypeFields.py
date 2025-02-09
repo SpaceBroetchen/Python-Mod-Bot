@@ -487,4 +487,8 @@ class TupleField(Field):
     def get_field(cls, type_json):
         print(
             "Currently not implemented Tuple Field got Implemented!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        return "None"
+        return "\tNone\n"
+
+class PrototypeConnector(Field):
+    prototype = None
+

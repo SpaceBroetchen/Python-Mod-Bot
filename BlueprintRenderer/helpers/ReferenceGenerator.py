@@ -69,7 +69,7 @@ def generateType(json_content):
             else:
                 file_handle.write(f"class {name}:\n")
         elif not isinstance(json_content["type"], dict) and json_content["type"] in Field.__field_registry__.keys():
-            file_handle.write(f"class {name}(TypeFields.{Field.__field_registry__[json_content['type']]}):\n")
+            file_handle.write(f"class {name}(TypeFields.{Field.__field_registry__[json_content['type']].__name__}):\n")
         elif not isinstance(json_content["type"], dict) and json_content["type"] in ("builtin",):
             pass # DataExtendMethod
 
