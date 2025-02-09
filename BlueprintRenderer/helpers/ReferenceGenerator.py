@@ -4,7 +4,7 @@ import shutil
 
 import os
 
-from BlueprintRenderer.reference.TypeFields import Field
+from BlueprintRenderer.reference.TypeFields import Field, LiteralField, typeField, UnionField, tokenize
 from configImport import *
 
 REFERENCE_TARGET = pathlib.Path(__file__).parent.parent.joinpath("reference", "generated").resolve()
@@ -29,8 +29,6 @@ def generateType(json_content):
     if name in Field.__field_registry__.keys():
         return ""
 
-    print(f"registering {name}")
-
     with open(os.path.join(REFERENCE_TARGET, "types", name + ".py"), "w") as file_handle:
         file_handle.write(f'"""\nThis is an automatic generated file for the {name} type,\n'
                           f'the documentation can be found here {documentation_link}\n"""\n\n')
@@ -40,9 +38,13 @@ def generateType(json_content):
         file_handle.write(f"from BlueprintRenderer.reference import TypeFields\n\n")
 
         imports = set()
+        fields = []
+
         if "properties" in json_content.keys():
             for field in json_content["properties"]:
-                imports = imports.union(Field.get_field_imports(field))
+                imp, f = Field.get_field_pair(field)
+                imports = imports.union(imp)
+                fields.append(f)
         if "" in imports:
             imports.remove("")
         if imports:
@@ -52,44 +54,48 @@ def generateType(json_content):
 
         file_handle.write(f"\n")
 
-        if parent is not None:
-            file_handle.write(f"class {name}({parent}.{parent}):\n")
-        else:
-            file_handle.write(f"class {name}(TypeFields.StructField):\n")
+        if isinstance(json_content["type"], dict) and "complex_type" in json_content["type"] and (json_content["type"][
+            "complex_type"] == "struct" or (json_content["type"]["complex_type"] == "union" and not UnionField.is_enum_field(json_content))):
+            if parent is not None:
+                file_handle.write(f"class {name}({parent}.{parent}):\n")
+            else:
+                file_handle.write(f"class {name}(TypeFields.StructField):\n")
+        elif isinstance(json_content["type"], str) and json_content["type"] == "string" and name.endswith("ID"):
+            pass
+        elif isinstance(json_content["type"], dict) and "complex_type" in json_content["type"] and json_content["type"][
+            "complex_type"] == "union":
+            if parent is not None:
+                file_handle.write(f"class {name}({parent}.{parent}):\n")
+            else:
+                file_handle.write(f"class {name}:\n")
+        elif not isinstance(json_content["type"], dict) and json_content["type"] in Field.__field_registry__.keys():
+            file_handle.write(f"class {name}(TypeFields.{Field.__field_registry__[json_content['type']]}):\n")
+        elif not isinstance(json_content["type"], dict) and json_content["type"] in ("builtin",):
+            pass # DataExtendMethod
 
         file_handle.write(f'\t"""\n')
         for line in description.split("\n"):
             file_handle.write(f'\t{line}\n')
         file_handle.write(f'\t"""\n\n')
 
-        if isinstance(json_content["type"], dict) and "complex_type" in json_content["type"] and json_content["type"][
-            "complex_type"] == "struct":
-            for field in json_content["properties"]:
-                imports, field_value = Field.get_field_pair(field)
-                file_handle.write(field_value)
+        if isinstance(json_content["type"], dict) and "complex_type" in json_content["type"] and (json_content["type"][
+            "complex_type"] == "struct" or (json_content["type"]["complex_type"] == "union" and not UnionField.is_enum_field(json_content))):
 
-        #if isinstance(json_content["type"], dict) and "complex_type" in json_content["type"] and json_content["type"][
-        #    "complex_type"] == "struct":
-        #    for field in json_content["properties"]:
-        #        optional = field["optional"]
-        #        default = field["default"] if "default" in field.keys() else None
-        #        parameters = dict()
-        #        if optional is not None:
-        #            parameters["optional"] = optional
-        #        if default is not None:
-        #            parameters["default_value"] = default
-        #        parameter_string = ', '.join([k + '=' + str(parameters[k]) for k in parameters.keys()])
-        #        file_handle.write(
-        #            f"\t{field['name']} = {Field.get_field_name(field['type'])}({parameter_string})\n")
+            for field in fields:
+                file_handle.write(field)
 
         elif isinstance(json_content["type"], str) and json_content["type"] == "string" and name.endswith("ID"):
-            # ID connector
-            # print("tried to register connector!")
-            pass
+            print("tried to register connector!")
+        elif isinstance(json_content["type"], dict) and "complex_type" in json_content["type"] and json_content["type"][
+            "complex_type"] == "union":
+            for option in json_content["type"]["options"]:
+                file_handle.write(f"\t{tokenize(option['value'])} = {LiteralField.get_literal(option)}\n")
+        elif not isinstance(json_content["type"], dict) and json_content["type"] in Field.__field_registry__.keys():
+            pass # extending default field!
+        elif not isinstance(json_content["type"], dict) and json_content["type"] in ("builtin",):
+            pass # DataExtendMethod
         else:
-            # print(json_content)
-            # print("No matching values found!")
-            pass
+            print(f"failed to register {json_content['name']}! {json_content['type']}")
     return f"import {name}\n"
 
 
