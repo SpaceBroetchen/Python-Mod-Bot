@@ -6,7 +6,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import discord
 import datetime
-from configImport import *
+from config2 import *
 import colorGenerator
 
 global observer
